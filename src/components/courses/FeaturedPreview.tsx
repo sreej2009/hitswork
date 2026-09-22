@@ -30,7 +30,7 @@ export function FeaturedPreview({ onClose }: { onClose: () => void }) {
   return <dialog ref={dialog} className="fc-preview" aria-labelledby="fc-preview-title" onCancel={onClose} onClick={e => { if (e.target === e.currentTarget) onClose() }}>
     <div className="fc-preview-inner">
       <button className="fc-preview-close" onClick={onClose} aria-label="Close course preview">×</button>
-      <div className="fc-preview-scene"><img src={`/images/featured/${scene.image}.webp`} alt="" /><div><p>HITSWORK · COURSE PREVIEW</p><h2 id="fc-preview-title">{scene.title}</h2><p>{scene.copy}</p></div></div>
+      <div className="fc-preview-scene"><img src={`${import.meta.env.BASE_URL}images/featured/${scene.image}.webp`} alt="" /><div><p>HITSWORK · COURSE PREVIEW</p><h2 id="fc-preview-title">{scene.title}</h2><p>{scene.copy}</p></div></div>
       <div className="fc-preview-controls"><button onClick={() => { if (time >= 25) { setTime(0); setPlaying(true) } else setPlaying(!playing) }}>{time >= 25 ? 'Replay' : playing ? 'Pause' : 'Play'}</button><input aria-label="Preview position" type="range" min="0" max="25" step=".25" value={time} onChange={e => setTime(Number(e.target.value))} /><span>0:{String(Math.floor(time)).padStart(2, '0')} / 0:25</span><Link to="/explore" onClick={onClose}>Explore courses →</Link></div>
     </div>
   </dialog>

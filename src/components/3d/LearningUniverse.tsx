@@ -172,7 +172,7 @@ function GlobeSurfaceArcs({ lowPower }: { lowPower: boolean }) {
   )
 }
 
-function CentralLogo() {
+function CentralLogo({ compact }: { compact: boolean }) {
   const glowTexture = useGlowTexture()
   const logoTexture = useMemo(() => new THREE.TextureLoader().load(logoIconUrl), [])
   const groupRef = useRef<THREE.Group>(null)
@@ -195,21 +195,37 @@ function CentralLogo() {
   })
 
   const aspect = 1086 / 1160
+  // On mobile the pentagon of cards sits closer to center (tighter camera
+  // framing — see Rig), so the logo is enlarged in world-space to stay
+  // clearly legible rather than relying on camera distance alone, which
+  // would otherwise force a tradeoff between logo size and card framing.
+  const logoSize = compact ? 1.05 : 0.68
+  const glowSize = compact ? 2.0 : 1.3
 
   return (
     <group ref={groupRef}>
       <Billboard>
         <mesh ref={glowRef} position={[0, 0, -0.02]}>
-          <planeGeometry args={[1.3, 1.3]} />
+          <planeGeometry args={[glowSize, glowSize]} />
           <meshBasicMaterial map={glowTexture} transparent blending={THREE.AdditiveBlending} depthWrite={false} />
         </mesh>
         <mesh>
-          <planeGeometry args={[0.68 * aspect, 0.68]} />
+          <planeGeometry args={[logoSize * aspect, logoSize]} />
           <meshBasicMaterial map={logoTexture} transparent depthWrite={false} />
         </mesh>
       </Billboard>
     </group>
   )
+}
+
+// Mobile-only: each pentagon card gets its own subtle drift direction
+// instead of sharing the desktop cards' single float keyframe.
+const compactFloatKeyframe: Record<string, string> = {
+  development: 'hero-panel-sway-x',
+  'ai-ml': 'hero-panel-sway-y',
+  design: 'hero-panel-drift-right',
+  marketing: 'hero-panel-drift-left',
+  data: 'hero-panel-drift-down',
 }
 
 function SkillPanelNode({
@@ -282,25 +298,31 @@ function SkillPanelNode({
           <meshBasicMaterial color="#6EA8FF" />
         </mesh>
         <Html center transform={false} style={{ pointerEvents: 'none' }} position={[0, 0.02, 0]} zIndexRange={[10, 0]}>
-          <div className={compact ? '-translate-y-[calc(100%+9px)]' : '-translate-y-[calc(100%+14px)]'}>
+          <div className={compact ? '-translate-y-[calc(100%+7px)]' : '-translate-y-[calc(100%+14px)]'}>
             <div
               className={
                 compact
-                  ? 'flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-electric-2/25 bg-[#0a0d16]/80 px-2 py-1.5 shadow-[0_6px_16px_-8px_rgba(0,0,0,0.6),0_0_14px_-8px_rgba(61,123,255,0.5)] backdrop-blur-md'
+                  ? 'flex w-[100px] items-center justify-center gap-1 whitespace-nowrap rounded-lg border border-electric-2/25 bg-[#0a0d16]/85 px-1.5 py-1.5 shadow-[0_6px_16px_-8px_rgba(0,0,0,0.6),0_0_14px_-8px_rgba(61,123,255,0.5)] backdrop-blur-md'
                   : 'flex items-center gap-2 whitespace-nowrap rounded-xl border border-electric-2/25 bg-[#0a0d16]/80 px-3 py-2 shadow-[0_8px_24px_-8px_rgba(0,0,0,0.6),0_0_20px_-8px_rgba(61,123,255,0.5)] backdrop-blur-md'
               }
-              style={{ animation: `hero-panel-float 5.5s ease-in-out ${index * 0.4}s infinite` }}
+              style={
+                compact
+                  ? reducedMotion
+                    ? undefined
+                    : { animation: `${compactFloatKeyframe[panel.id] ?? 'hero-panel-float'} 6s ease-in-out ${index * 0.5}s infinite` }
+                  : { animation: `hero-panel-float 5.5s ease-in-out ${index * 0.4}s infinite` }
+              }
             >
               <span
                 className={
                   compact
-                    ? 'flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-md bg-electric/15 text-electric-2'
+                    ? 'flex h-4 w-4 shrink-0 items-center justify-center rounded-md bg-electric/15 text-electric-2'
                     : 'flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-electric/15 text-electric-2'
                 }
               >
                 <SkillIcon icon={panel.icon} className={compact ? 'h-2.5 w-2.5' : 'h-3.5 w-3.5'} />
               </span>
-              <span className={compact ? 'text-[10.5px] font-medium text-ink' : 'text-[13px] font-medium text-ink'}>
+              <span className={compact ? 'text-[9.5px] font-medium text-ink' : 'text-[13px] font-medium text-ink'}>
                 {panel.label}
               </span>
             </div>
@@ -315,12 +337,20 @@ const CAMERA_FOV = 40
 // Panel-cluster geometry the framing must keep on-screen. Card sizes are
 // fixed CSS pixels (unlike the 3D scene, they don't shrink with distance),
 // so — unlike a flat world-unit margin — the required camera distance is
-// solved per-frame from the canvas's actual pixel dimensions below. The
-// compact (lowPower) cards are visually smaller, so their pixel budget is
-// smaller too — otherwise a tiny mobile canvas forces an absurd zoom-out.
+// solved per-frame from the canvas's actual pixel dimensions below. Desktop
+// and mobile (compact) are two different compositions (7 wide-spread nodes
+// vs. a tight 5-node pentagon), so each gets its own geometry constants
+// rather than scaling one set down.
 const TOP_DOT_RADIUS = 1.05 // AI & ML, the topmost panel
 const SIDE_DOT_RADIUS = 1.55 // widest side panels (Development/Marketing/Data)
 const BOTTOM_DOT_RADIUS = 1.5 // Business/Cloud — cards fold inward, no extra margin needed
+
+// Mobile pentagon (5 nodes, 72° apart, radius 1.05 — see heroSkillPanelsCompact):
+// top node sits at y = radius; the two upper-side nodes at x = radius·sin72°;
+// the two lower-side nodes at |y| = radius·cos144°.
+const COMPACT_TOP_DOT_RADIUS = 1.05
+const COMPACT_SIDE_DOT_RADIUS = 1.0
+const COMPACT_BOTTOM_DOT_RADIUS = 0.85
 
 function Rig({
   scrollRef,
@@ -356,16 +386,19 @@ function Rig({
     const { width, height } = size
     const aspect = width / Math.max(height, 1)
     const tanHalfFov = Math.tan((CAMERA_FOV * Math.PI) / 360)
-    const topCardOffsetPx = compact ? 34 : 54
-    const sideCardHalfWidthPx = compact ? 75 : 145
+    const topCardOffsetPx = compact ? 44 : 54
+    const sideCardHalfWidthPx = compact ? 56 : 145
+    const topRadius = compact ? COMPACT_TOP_DOT_RADIUS : TOP_DOT_RADIUS
+    const sideRadius = compact ? COMPACT_SIDE_DOT_RADIUS : SIDE_DOT_RADIUS
+    const bottomRadius = compact ? COMPACT_BOTTOM_DOT_RADIUS : BOTTOM_DOT_RADIUS
 
     const topDenom = Math.max(1 - (2 * topCardOffsetPx) / height, 0.12)
-    const dTop = TOP_DOT_RADIUS / (tanHalfFov * topDenom)
+    const dTop = topRadius / (tanHalfFov * topDenom)
 
     const sideDenom = Math.max(aspect - (2 * sideCardHalfWidthPx) / height, 0.12)
-    const dSide = SIDE_DOT_RADIUS / (tanHalfFov * sideDenom)
+    const dSide = sideRadius / (tanHalfFov * sideDenom)
 
-    const dBottom = BOTTOM_DOT_RADIUS / tanHalfFov
+    const dBottom = bottomRadius / tanHalfFov
 
     const dynamicZ = Math.max(baseZ, dTop, dSide, dBottom)
 
@@ -382,7 +415,7 @@ function Rig({
 
 export function LearningUniverse({ scrollRef, reducedMotion, lowPower }: UniverseProps) {
   const panels = lowPower ? heroSkillPanelsCompact : heroSkillPanels
-  const baseZ = lowPower ? 5.4 : 5.0
+  const baseZ = lowPower ? 3.2 : 5.0
 
   return (
     <Canvas
@@ -396,7 +429,7 @@ export function LearningUniverse({ scrollRef, reducedMotion, lowPower }: Univers
       <GlobeWireframe lowPower={lowPower} />
       <GlobeSurfaceNodes lowPower={lowPower} />
       <GlobeSurfaceArcs lowPower={lowPower} />
-      <CentralLogo />
+      <CentralLogo compact={lowPower} />
       {panels.map((panel, i) => (
         <SkillPanelNode key={panel.id} panel={panel} index={i} compact={lowPower} reducedMotion={reducedMotion} />
       ))}

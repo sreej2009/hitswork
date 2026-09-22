@@ -115,14 +115,16 @@ export const heroSkillPanels: HeroSkillPanel[] = [
 ]
 
 /**
- * Reduced panel set for low-power/mobile devices — fewer nodes, simpler
- * scene. Uses its own evenly-spaced (90°) angles rather than the desktop
- * set's, since crowded/uneven gaps that read fine with 7 panels spread
- * across a large canvas cause card overlap on a small mobile canvas.
+ * Dedicated mobile Hero composition — a fixed 5-card pentagon (AI & ML top,
+ * Design/Development upper sides, Data/Marketing lower sides), evenly spaced
+ * 72° apart. Deliberately its own layout rather than a scaled-down version
+ * of the 7-node desktop set: uneven desktop gaps that read fine on a large
+ * canvas cause card overlap on a small mobile canvas.
  */
 export const heroSkillPanelsCompact: HeroSkillPanel[] = [
-  { id: 'ai-ml', label: 'AI & ML', icon: 'ai', angleDeg: 0, radius: 1.1, z: 0.15 },
-  { id: 'data', label: 'Data', icon: 'data', angleDeg: 90, radius: 1.25, z: 0.2 },
-  { id: 'cloud', label: 'Cloud', icon: 'cloud', angleDeg: 180, radius: 1.1, z: -0.15 },
-  { id: 'development', label: 'Development', icon: 'development', angleDeg: 270, radius: 1.25, z: 0.15 },
+  { id: 'ai-ml', label: 'AI & ML', icon: 'ai', angleDeg: 0, radius: 1.05, z: 0.15 },
+  { id: 'design', label: 'Design', icon: 'design', angleDeg: 72, radius: 1.05, z: -0.1 },
+  { id: 'data', label: 'Data', icon: 'data', angleDeg: 144, radius: 1.05, z: 0.2 },
+  { id: 'marketing', label: 'Marketing', icon: 'marketing', angleDeg: 216, radius: 1.05, z: -0.15 },
+  { id: 'development', label: 'Development', icon: 'development', angleDeg: 288, radius: 1.05, z: 0.1 },
 ]

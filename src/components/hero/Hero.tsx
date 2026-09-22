@@ -35,12 +35,12 @@ export function Hero() {
   }, [])
 
   return (
-    <section ref={sectionRef} className="relative h-[100svh] min-h-[720px] w-full overflow-hidden bg-void">
+    <section ref={sectionRef} className="relative min-h-[100svh] w-full overflow-hidden bg-void lg:h-[100svh] lg:min-h-[720px]">
       <div className="absolute inset-0 transition-opacity duration-[1400ms]" style={{ opacity: bgVisible ? 1 : 0 }}>
         <HeroAtmosphere />
       </div>
 
-      <div className="relative z-10 mx-auto flex h-full max-w-[1680px] flex-col gap-10 px-6 pb-10 pt-28 sm:px-10 lg:flex-row lg:items-center lg:gap-6 lg:px-14 lg:pb-0 lg:pt-24 xl:px-20">
+      <div className="relative z-10 mx-auto flex h-full max-w-[1680px] flex-col gap-8 px-6 pb-6 pt-28 sm:px-10 lg:flex-row lg:items-center lg:gap-6 lg:px-14 lg:pb-0 lg:pt-24 xl:px-20">
         {/* LEFT — marketing content */}
         <div className="flex w-full flex-col justify-center lg:w-[47%] lg:shrink-0">
           <motion.p
@@ -104,7 +104,7 @@ export function Hero() {
         </div>
 
         {/* RIGHT — 3D learning universe */}
-        <div className="relative h-[320px] w-full overflow-hidden sm:h-[420px] lg:h-full lg:flex-1">
+        <div className="relative h-[280px] w-full overflow-hidden sm:h-[420px] lg:h-full lg:flex-1">
           <div className="absolute inset-0" style={{ opacity: bgVisible ? 1 : 0, transition: 'opacity 1.2s ease 0.3s' }}>
             <Suspense fallback={null}>
               <LearningUniverse scrollRef={scrollRef} reducedMotion={reducedMotion} lowPower={lowPower} />

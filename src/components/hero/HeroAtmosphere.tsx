@@ -50,16 +50,18 @@ export function HeroAtmosphere() {
         />
       ))}
 
-      {/* distant rock silhouettes framing the bottom corners */}
+      {/* distant rock silhouettes framing the bottom corners — kept low on
+          mobile so they read as a subtle bottom edge behind the 3D visual
+          rather than a large shape occupying the lower composition */}
       <svg
-        className="absolute bottom-0 left-0 h-[220px] w-[320px] text-[#070b14] opacity-70 sm:h-[280px] sm:w-[420px]"
+        className="absolute bottom-0 left-0 h-[76px] w-[114px] text-[#070b14] opacity-70 sm:h-[280px] sm:w-[420px]"
         viewBox="0 0 420 280"
         fill="none"
       >
         <path d="M0 280V150l60-40 40 30 50-70 70 50 30-20 40 40 90-60 100 100v100H0Z" fill="currentColor" />
       </svg>
       <svg
-        className="absolute bottom-0 right-0 h-[200px] w-[300px] text-[#070b14] opacity-70 sm:h-[260px] sm:w-[400px]"
+        className="absolute bottom-0 right-0 h-[68px] w-[105px] text-[#070b14] opacity-70 sm:h-[260px] sm:w-[400px]"
         viewBox="0 0 400 260"
         fill="none"
       >
